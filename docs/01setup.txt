@@ -1,0 +1,4 @@
+Setting up chip8 and development enviroment 
+
+tools - gcc gnumake SDL2 [if ur using nix type nix-shell]
+

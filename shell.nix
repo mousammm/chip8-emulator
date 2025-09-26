@@ -7,6 +7,7 @@ pkgs.mkShell {
     gcc 
     gnumake
     SDL2
+    pkg-config # for sdl compilation
   ];
 
   shellHook = ''
