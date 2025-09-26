@@ -18,12 +18,15 @@ int main(int argc,char **argv){
     (void) argc;
     (void) argv;
 
+   //sdl initialisation
    sdl_t sdl = {0};
    if(!init_sdl(&sdl)) exit(EXIT_FAILURE);
    printf("SDL initialise seccessfully!\n");
 
+   //sdl show display
    sdl_show_display(&sdl);
   
+   //sdl cleanup
    sdl_cleanup(&sdl);
    printf("SDL cleanup seccessfully!\n");
 
@@ -37,7 +40,7 @@ bool init_sdl(sdl_t *sdl){
      }   
 
    // create a window 
-    sdl->window = SDL_CreateWindow("Chip8",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,SCALE_WINDOW*64,SCALE_WINDOW*32,0);
+    sdl->window = SDL_CreateWindow("Chip8",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,SCALE_WINDOW*64,SCALE_WINDOW*32,SDL_WINDOW_SHOWN);
     if (!sdl->window) {
         fprintf(stderr, "Could not create Window: %s\n",SDL_GetError());
         return false; //failed
@@ -49,16 +52,14 @@ bool init_sdl(sdl_t *sdl){
         fprintf(stderr, "Could not create Render: %s\n",SDL_GetError());
         return false; //failed
     }
-
-
     return true;
-};
+}
 
 void sdl_cleanup(sdl_t *sdl){
-     SDL_DestroyWindow(sdl->window);
-     SDL_DestroyRenderer(sdl->renderer);
+     if(sdl->window) SDL_DestroyWindow(sdl->window);
+     if(sdl->renderer) SDL_DestroyRenderer(sdl->renderer);
      SDL_Quit();
-};
+}
 
 void sdl_show_display(sdl_t *sdl){
    bool running = true;
