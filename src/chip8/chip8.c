@@ -62,9 +62,6 @@ void chip8_cycle(chip8_t *chip8){
    uint16_t opcode = (chip8->memory[chip->pc] << 8) | chip8->memory[chip8->pc+1];
    chip8->pc+=2;
 
-   chip8_execute_opcode(chip8);
+
 }
 
-void chip8_execute_opcode(chip8_t *chip8){
-   
-}
