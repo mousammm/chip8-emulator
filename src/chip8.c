@@ -1,98 +1,70 @@
-#include <stdio.h>   // input/output 
-#include <stdbool.h> // bool fun 
-#include <stdlib.h>  // exit(EXIT_SUCCESS)
-#include <stdint.h>  // uint8/16
-#include <SDL2/SDL.h> // audio video inputs 
+#include "chip8.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#define SCALE_WINDOW 20
+// chip8 fontset 
+const uint8_t font[80] = {
+    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};
 
-typedef struct {
-   SDL_Window *window;
-   SDL_Renderer *renderer;
-} sdl_t;
+void chip8_init(chip8_t *chip8){
+   memset(chip8,0,sizeof(chip8_t));
 
-bool init_sdl(sdl_t *sdl);
-void sdl_cleanup(sdl_t *sdl);
-void sdl_show_display(sdl_t *sdl);
+   // load font 
+   memcpy(&chip8->memory[0],font,sizeof(fontset));
 
-int main(int argc,char **argv){
-    (void) argc;
-    (void) argv;
-
-   //sdl initialisation
-   sdl_t sdl = {0};
-   if(!init_sdl(&sdl)) exit(EXIT_FAILURE);
-   printf("SDL initialise seccessfully!\n");
-
-   //sdl show display
-   sdl_show_display(&sdl);
-  
-   //sdl cleanup
-   sdl_cleanup(&sdl);
-   printf("SDL cleanup seccessfully!\n");
-
-    exit(EXIT_SUCCESS);
+   // set program counter 
+   chip8->pc = 0x200;
+   chip8->draw_flag = true;
 }
 
-bool init_sdl(sdl_t *sdl){
-     if ((SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) !=0 )) {
-        fprintf(stderr, "Could not initialized SDL: %s\n",SDL_GetError());
-        return false; //failed
-     }   
+bool chip8_load_rom(chip8_t *chip8,const char *filename){
+   FILE *file = fopen(filename, "rb");
+   // if !file
 
-   // create a window 
-    sdl->window = SDL_CreateWindow("Chip8",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,SCALE_WINDOW*64,SCALE_WINDOW*32,SDL_WINDOW_SHOWN);
-    if (!sdl->window) {
-        fprintf(stderr, "Could not create Window: %s\n",SDL_GetError());
-        return false; //failed
-    }
+   fseek(file,0,SEEK_END);
+   long size = ftell(file);
+   rewind(file);
 
-   // create a renderer 
-   sdl->renderer = SDL_CreateRenderer(sdl->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-     if (!sdl->renderer) {
-        fprintf(stderr, "Could not create Render: %s\n",SDL_GetError());
-        return false; //failed
-    }
-    return true;
+   if(size>4096 - 0x200){
+      fprintf(stderr, "ROM too big: %ld bytes\n",size);
+      fclose(file);
+      return false;
+   }
+   
+   fread(&chip8->memory[0x200],1,size,file);
+   fclose(file);
+   return true; 
 }
 
-void sdl_cleanup(sdl_t *sdl){
-     if(sdl->window) SDL_DestroyWindow(sdl->window);
-     if(sdl->renderer) SDL_DestroyRenderer(sdl->renderer);
-     SDL_Quit();
+void chip8_timers(chip8_t *chip8){
+
 }
 
-void sdl_show_display(sdl_t *sdl){
-   bool running = true;
-   while (running) {
-       SDL_Event event;
-       while (SDL_PollEvent(&event)) {
-          switch (event.type) {
-             case SDL_QUIT:
-               running = false;
-               break;
-             case SDL_KEYDOWN:
-                  switch (event.key.keysym.sym) {
-                    case SDLK_ESCAPE:
-                        printf("Escape pressed - exiting\n");
-                        running = false;
-                        break;
-                    case SDLK_SPACE:
-                        printf("Space pressed\n");
-                        break;
-                }
-               break;
-             case SDL_KEYUP:
-               break;
-             default:
-               break;
-          }
-       }
-       SDL_SetRenderDrawColor(sdl->renderer,0,10,255,255); // set bg color
-       SDL_RenderClear(sdl->renderer); // clear initial renderer
-       SDL_RenderPresent(sdl->renderer); // show actual window/update display
+void chip8_cycle(chip8_t *chip8){
 
-       SDL_Delay(16); // 60hz
-   };
+   uint16_t opcode = (chip8->memory[chip->pc] << 8) | chip8->memory[chip8->pc+1];
+   chip8->pc+=2;
+
+   chip8_execute_opcode(chip8);
 }
 
+void chip8_execute_opcode(chip8_t *chip8){
+   
+}
