@@ -1,6 +1,7 @@
 #include <stdio.h>   // input/output 
 #include <stdbool.h> // bool fun 
 #include <stdlib.h>  // exit(EXIT_SUCCESS)
+#include <stdint.h>  // uint8/16
 #include <SDL2/SDL.h> // audio video inputs 
 
 #define SCALE_WINDOW 20
@@ -13,7 +14,7 @@ typedef struct {
 bool init_sdl(sdl_t *sdl);
 void sdl_cleanup(sdl_t *sdl);
 void sdl_show_display(sdl_t *sdl);
- 
+
 int main(int argc,char **argv){
     (void) argc;
     (void) argv;
@@ -94,3 +95,4 @@ void sdl_show_display(sdl_t *sdl){
        SDL_Delay(16); // 60hz
    };
 }
+
